@@ -1,4 +1,4 @@
 Voorhees
 ========
 
-** TODO: Add description **
+A library that aids in testing JSON APIs
