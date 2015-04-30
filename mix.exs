@@ -2,12 +2,16 @@ defmodule Voorhees.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :voorhees,
-     version: "0.0.1",
-     name: "Voorhees",
-     source_url: "https://github.com/danmcclain/voorhees",
-     elixir: "~> 1.0",
-     deps: deps]
+    [
+      app: :voorhees,
+      version: "0.0.1",
+      name: "Voorhees",
+      description: "A library for validating JSON responses",
+      source_url: "https://github.com/danmcclain/voorhees",
+      package: package,
+      elixir: "~> 1.0",
+      deps: deps
+    ]
   end
 
   # Configuration for the OTP application
@@ -30,6 +34,17 @@ defmodule Voorhees.Mixfile do
     [
       {:poison, ">= 0.0.0"},
       {:ex_doc, github: "elixir-lang/ex_doc"}
+    ]
+  end
+
+  defp package do
+    [
+      contributors: ["Dan McClain"],
+      licenses: ["MIT"],
+      links: %{
+        "GitHub" => "https://github.com/danmcclain/voorhees",
+        "Documentation" => "http://hexdocs.pm/voorhees"
+      }
     ]
   end
 end
