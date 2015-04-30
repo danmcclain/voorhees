@@ -1,5 +1,50 @@
 defmodule Voorhees do
-  require IEx
+  @moduledoc """
+  A library for validating JSON responses
+  """
+
+  @doc """
+
+  Returns true if the content matches the format of the expected keys matched in.
+
+  ## Examples
+
+  Validating simple objects
+
+      iex> content = ~S[{ "foo": 1, "bar": "baz" }]
+      iex> Voorhees.matches_schema?(content, [:foo, "bar"]) # Property names can be strings or atoms
+      true
+
+      # Extra keys
+      iex> content = ~S[{ "foo": 1, "bar": "baz", "boo": 3 }]
+      iex> Voorhees.matches_schema?(content, [:foo, "bar"])
+      false
+
+      # Missing keys
+      iex> content = ~S[{ "foo": 1 }]
+      iex> Voorhees.matches_schema?(content, [:foo, "bar"])
+      false
+
+  Validating lists of objects
+
+      iex> content = ~S/[{ "foo": 1, "bar": "baz" },{ "foo": 2, "bar": "baz" }]/
+      iex> Voorhees.matches_schema?(content, [:foo, "bar"])
+      true
+
+
+  Validating nested lists of objects
+
+      iex> content = ~S/{ "foo": 1, "bar": [{ "baz": 2 }]}/
+      iex> Voorhees.matches_schema?(content, [:foo, bar: [:baz]])
+      true
+
+  Validating that a property is a list of scalar values
+
+      iex> content = ~S/{ "foo": 1, "bar": ["baz", 2]}/
+      iex> Voorhees.matches_schema?(content, [:foo, bar: []])
+      true
+
+  """
   def matches_schema?(content, expected_keys) do
     expected_keys = _normalize_keys(expected_keys)
     parsed_content =  Poison.decode!(content)

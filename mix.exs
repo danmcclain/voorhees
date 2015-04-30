@@ -4,6 +4,8 @@ defmodule Voorhees.Mixfile do
   def project do
     [app: :voorhees,
      version: "0.0.1",
+     name: "Voorhees",
+     source_url: "https://github.com/danmcclain/voorhees",
      elixir: "~> 1.0",
      deps: deps]
   end
@@ -26,7 +28,8 @@ defmodule Voorhees.Mixfile do
   # Type `mix help deps` for more examples and options
   defp deps do
     [
-      {:poison, ">= 0.0.0"}
+      {:poison, ">= 0.0.0"},
+      {:ex_doc, github: "elixir-lang/ex_doc"}
     ]
   end
 end
