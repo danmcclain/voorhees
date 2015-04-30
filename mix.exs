@@ -33,7 +33,8 @@ defmodule Voorhees.Mixfile do
   defp deps do
     [
       {:poison, ">= 0.0.0"},
-      {:ex_doc, github: "elixir-lang/ex_doc"}
+      {:ex_doc, "~> 0.6"},
+      {:inch_ex, only: :docs}
     ]
   end
 
