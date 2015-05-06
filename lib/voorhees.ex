@@ -108,7 +108,7 @@ defmodule Voorhees do
       true
 
   """
-  @spec matches_payload?(String.t, list | String.t) :: boolean
+  @spec matches_payload?(String.t, list | map) :: boolean
   def matches_payload?(payload, expected_payload) do
     expected_payload = _normalize_map(expected_payload)
     parsed_payload =  Poison.decode!(payload)
