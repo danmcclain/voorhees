@@ -137,7 +137,7 @@ defmodule Voorhees do
     |> Enum.into(%{})
   end
 
-  defp _filter_out_extra_keys(payload, expected_payload), do: payload
+  defp _filter_out_extra_keys(payload, _expected_payload), do: payload
 
   defp _normalize_map(map) when is_map(map) do
     map
