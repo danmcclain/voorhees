@@ -44,16 +44,19 @@ Validates scalar lists
     false
 
 Validates lists of objects
+
     iex> payload = ~S/[{ "foo": 1, "bar": { "baz": 2 }}]/
     iex> Voorhees.matches_payload?(payload, [%{ :foo => 1, "bar" => %{ "baz" => 2 } }])
     true
 
 Validates nested objects
+
     iex> payload = ~S/{ "foo": 1, "bar": { "baz": 2 }}/
     iex> Voorhees.matches_payload?(payload, %{ :foo => 1, "bar" => %{ "baz" => 2 } })
     true
 
 Validates nested lists of objects
+
     iex> payload = ~S/{ "foo": 1, "bar": [{ "baz": 2 }]}/
     iex> Voorhees.matches_payload?(payload, %{ :foo => 1, "bar" => [%{ "baz" => 2 }] })
     true
