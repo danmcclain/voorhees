@@ -14,7 +14,7 @@ API documentation can be found at [http://hexdocs.pm/voorhees](http://hexdocs.pm
 
 ### `Voorhees.matches_payload?`
 
-Expected payload can keys can be either strings or atoms
+Expected payload keys can be either strings or atoms
 
     iex> payload = ~S[{ "foo": 1, "bar": "baz" }]
     iex> Voorhees.matches_payload?(payload, %{ :foo => 1, "bar" => "baz" })
