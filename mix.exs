@@ -4,7 +4,7 @@ defmodule Voorhees.Mixfile do
   def project do
     [
       app: :voorhees,
-      version: "0.1.0",
+      version: "0.1.1",
       name: "Voorhees",
       description: "A library for validating JSON responses",
       source_url: "https://github.com/danmcclain/voorhees",
