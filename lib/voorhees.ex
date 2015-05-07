@@ -164,6 +164,7 @@ defmodule Voorhees do
     content_keys = payload
     |> Map.keys
     |> _extract_subkeys(payload)
+    |> _normalize_key_list
 
     extra_keys = content_keys -- expected_keys
     missing_keys = expected_keys -- content_keys
@@ -171,9 +172,10 @@ defmodule Voorhees do
     Enum.empty?(extra_keys) and Enum.empty?(missing_keys)
   end
 
+
   defp _normalize_key_list([]), do: []
   defp _normalize_key_list([{key, subkeys}|rest]) when is_list(subkeys) do
-    [{_normalize_key(key), _normalize_key_list(subkeys)}|_normalize_key_list(rest)]
+    [{_normalize_key(key), Enum.sort(_normalize_key_list(subkeys))}|_normalize_key_list(rest)]
   end
   defp _normalize_key_list([key|rest]), do: [_normalize_key(key)|_normalize_key_list(rest)]
 

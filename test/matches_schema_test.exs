@@ -7,6 +7,22 @@ defmodule Voorhees.Test.MatchesSchema do
     assert matches_schema?(content, [:a, "b"])
   end
 
+  test "order of keys does not matter" do
+    content = Poison.encode! %{ b: 1, a: 2 }
+    assert matches_schema?(content, [:a, :b])
+
+    content = Poison.encode! %{ user: %{ id: 1, username: 2 } }
+    assert matches_schema?(content, [user: [:username, :id]])
+
+    content = Poison.encode! %{ user: [%{ id: 1, username: 2 }, %{ username: 1, id: 2 }] }
+    assert matches_schema?(content, [user: [:username, :id]])
+    assert matches_schema?(content, [user: [:id, :username]])
+
+    content = Poison.encode! %{ user: [%{ id: 1, username: %{ test: 2, bob: 3 } }, %{ username: %{ bob: 3, test: 5 }, id: 2 }] }
+    assert matches_schema?(content, [user: [:id, username: [:test, :bob]]])
+    assert matches_schema?(content, [user: [:id, username: [:bob, :test]]])
+  end
+
   test "empty lists in expected keys should be lists of scalars in content" do
     content = Poison.encode! %{ a: 1, b: 2, c: [1, 2, 3, nil, "test"] }
     assert matches_schema?(content, [:a, "b", c: []])
@@ -53,6 +69,9 @@ defmodule Voorhees.Test.MatchesSchema do
   test "check nested lists" do
     content = Poison.encode! %{ a: 1, b: 2, c: [%{ d: 4 }, %{ d: 5 }] }
     assert matches_schema?(content, [:a, :b, c: [:d]])
+
+    content = Poison.encode! %{ a: [%{ d: 4 }, %{ d: 5 }] }
+    assert matches_schema?(content, [a: [:d]])
 
     content = Poison.encode! [%{ a: 1, b: 2, c: [%{ d: 4 }] }]
     assert matches_schema?(content, [:a, :b, c: [:d]])
