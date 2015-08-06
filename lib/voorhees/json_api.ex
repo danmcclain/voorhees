@@ -1,7 +1,7 @@
 defmodule Voorhees.JSONApi do
   import ExUnit.Assertions
 
-  def assert_schema(%{"data" => resource }, expected) when is_map(resource) do
+  def assert_schema(%{"data" => resource } = actual , expected) when is_map(resource) do
     %{"type" => type, "attributes" => attributes} = resource
 
     expected
@@ -13,6 +13,8 @@ defmodule Voorhees.JSONApi do
         %{attributes: expected_attributes} = expected_schema
         _assert_attributes(attributes, expected_attributes)
     end
+
+    actual
   end
 
   defp _assert_attributes(attributes, expected_attributes) do
@@ -25,5 +27,11 @@ defmodule Voorhees.JSONApi do
 
     missing_attributes = expected_attributes -- attribute_names
     assert [] == missing_attributes, "Payload was missing attributes: #{missing_attributes |> Enum.join(", ")}"
+  end
+
+  def assert_payload(actual, expected) do
+    assert Voorhees.matches_payload?(actual, expected), "Payload did not match expected"
+
+    actual
   end
 end

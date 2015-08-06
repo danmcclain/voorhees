@@ -66,4 +66,76 @@ defmodule Voorhees.Test.JSONApi do
       Voorhees.JSONApi.assert_schema payload, %{user: %{attributes: [:email]}}
     end
   end
+
+  test "does not throw error when the data objects match" do
+    payload = %{
+      "data" => %{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      }
+    }
+
+    Voorhees.JSONApi.assert_payload payload, %{
+      data: %{
+        id: "1",
+        type: "user",
+        attributes: %{
+          email: "test@example.com",
+          name: "Tester"
+        }
+      }
+    }
+  end
+
+  test "does not throw error when the payload has attributes not in the expected payload" do
+    payload = %{
+      "data" => %{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      }
+    }
+
+    Voorhees.JSONApi.assert_payload payload, %{
+      data: %{
+        id: "1",
+        type: "user",
+        attributes: %{
+          name: "Tester"
+        }
+      }
+    }
+  end
+
+  test "throws an error when the actual payload is missing attributes" do
+    payload = %{
+      "data" => %{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "name" => "Tester"
+        }
+      }
+    }
+
+    assert_raise ExUnit.AssertionError, "Payload did not match expected", fn ->
+      Voorhees.JSONApi.assert_payload payload, %{
+        data: %{
+          id: "1",
+          type: "user",
+          attributes: %{
+            email: "test@example.com",
+            name: "Tester"
+          }
+        }
+      }
+    end
+  end
 end

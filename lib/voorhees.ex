@@ -109,9 +109,14 @@ defmodule Voorhees do
 
   """
   @spec matches_payload?(String.t, list | map) :: boolean
+  def matches_payload?(payload, expected_payload) when is_binary(payload) do
+    Poison.decode!(payload)
+    |> matches_payload?(expected_payload)
+  end
+
   def matches_payload?(payload, expected_payload) do
     expected_payload = _normalize_map(expected_payload)
-    parsed_payload =  Poison.decode!(payload)
+    parsed_payload = payload
     |> _filter_out_extra_keys(expected_payload)
 
     parsed_payload == expected_payload
