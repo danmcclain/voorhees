@@ -1,7 +1,20 @@
 defmodule Voorhees.JSONApi do
   import ExUnit.Assertions
 
+  def assert_schema(%{"data" => list } = actual , expected) when is_list(list) do
+    list
+    |> Enum.map(&(_assert_resource(&1, expected)))
+
+    actual
+  end
+
   def assert_schema(%{"data" => resource } = actual , expected) when is_map(resource) do
+    _assert_resource(resource, expected)
+
+    actual
+  end
+
+  defp _assert_resource(resource, expected) do
     %{"type" => type, "attributes" => attributes} = resource
 
     expected
@@ -13,8 +26,6 @@ defmodule Voorhees.JSONApi do
         %{attributes: expected_attributes} = expected_schema
         _assert_attributes(attributes, expected_attributes)
     end
-
-    actual
   end
 
   defp _assert_attributes(attributes, expected_attributes) do

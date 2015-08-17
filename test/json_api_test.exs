@@ -14,6 +14,39 @@ defmodule Voorhees.Test.JSONApi do
     }
 
     Voorhees.JSONApi.assert_schema payload, %{user: %{attributes: [:email, :name]}}
+
+    payload = %{
+      "data" => [%{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      }]
+    }
+
+    Voorhees.JSONApi.assert_schema payload, %{user: %{attributes: [:email, :name]}}
+
+    payload = %{
+      "data" => [%{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      },%{
+        "type" => "user",
+        "id" => "2",
+        "attributes" => %{
+          "email" => "test2@example.com",
+          "name" => "Tester"
+        }
+      }]
+    }
+
+    Voorhees.JSONApi.assert_schema payload, %{user: %{attributes: [:email, :name]}}
   end
 
   test "throws an assertion error when an unexpected type is provided" do
@@ -26,6 +59,43 @@ defmodule Voorhees.Test.JSONApi do
           "name" => "Tester"
         }
       }
+    }
+
+    assert_raise ExUnit.AssertionError, "Expected schema did not contain type: user", fn ->
+      Voorhees.JSONApi.assert_schema payload, %{post: %{attributes: [:title, :body]}}
+    end
+
+    payload = %{
+      "data" => [%{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      }]
+    }
+
+    assert_raise ExUnit.AssertionError, "Expected schema did not contain type: user", fn ->
+      Voorhees.JSONApi.assert_schema payload, %{post: %{attributes: [:title, :body]}}
+    end
+
+    payload = %{
+      "data" => [%{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      },%{
+        "type" => "user",
+        "id" => "2",
+        "attributes" => %{
+          "email" => "test2@example.com",
+          "name" => "Tester"
+        }
+      }]
     }
 
     assert_raise ExUnit.AssertionError, "Expected schema did not contain type: user", fn ->
@@ -48,6 +118,43 @@ defmodule Voorhees.Test.JSONApi do
     assert_raise ExUnit.AssertionError, "Payload was missing attributes: title", fn ->
       Voorhees.JSONApi.assert_schema payload, %{user: %{attributes: [:email, :name, :title]}}
     end
+
+    payload = %{
+      "data" => [%{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      }]
+    }
+
+    assert_raise ExUnit.AssertionError, "Payload was missing attributes: title", fn ->
+      Voorhees.JSONApi.assert_schema payload, %{user: %{attributes: [:email, :name, :title]}}
+    end
+
+    payload = %{
+      "data" => [%{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      },%{
+        "type" => "user",
+        "id" => "2",
+        "attributes" => %{
+          "email" => "test2@example.com",
+          "name" => "Tester"
+        }
+      }]
+    }
+
+    assert_raise ExUnit.AssertionError, "Payload was missing attributes: title", fn ->
+      Voorhees.JSONApi.assert_schema payload, %{user: %{attributes: [:email, :name, :title]}}
+    end
   end
 
   test "throws an assertion error when it has extra attributes" do
@@ -60,6 +167,43 @@ defmodule Voorhees.Test.JSONApi do
           "name" => "Tester"
         }
       }
+    }
+
+    assert_raise ExUnit.AssertionError, "Payload contained additional attributes: name", fn ->
+      Voorhees.JSONApi.assert_schema payload, %{user: %{attributes: [:email]}}
+    end
+
+    payload = %{
+      "data" => [%{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      }]
+    }
+
+    assert_raise ExUnit.AssertionError, "Payload contained additional attributes: name", fn ->
+      Voorhees.JSONApi.assert_schema payload, %{user: %{attributes: [:email]}}
+    end
+
+    payload = %{
+      "data" => [%{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      },%{
+        "type" => "user",
+        "id" => "2",
+        "attributes" => %{
+          "email" => "test2@example.com",
+          "name" => "Tester"
+        }
+      }]
     }
 
     assert_raise ExUnit.AssertionError, "Payload contained additional attributes: name", fn ->
