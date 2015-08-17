@@ -10,7 +10,14 @@ defmodule Voorhees.Test.JSONApi do
           "email" => "test@example.com",
           "name" => "Tester"
         }
-      }
+      }, "included" => [%{
+        "type" => "user",
+        "id" => "3",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      }]
     }
 
     Voorhees.JSONApi.assert_schema payload, %{user: %{attributes: [:email, :name]}}
@@ -19,6 +26,14 @@ defmodule Voorhees.Test.JSONApi do
       "data" => [%{
         "type" => "user",
         "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      }],
+      "included" => [%{
+        "type" => "user",
+        "id" => "3",
         "attributes" => %{
           "email" => "test@example.com",
           "name" => "Tester"
@@ -41,6 +56,14 @@ defmodule Voorhees.Test.JSONApi do
         "id" => "2",
         "attributes" => %{
           "email" => "test2@example.com",
+          "name" => "Tester"
+        }
+      }],
+      "included" => [%{
+        "type" => "user",
+        "id" => "3",
+        "attributes" => %{
+          "email" => "test@example.com",
           "name" => "Tester"
         }
       }]
@@ -67,6 +90,13 @@ defmodule Voorhees.Test.JSONApi do
 
     payload = %{
       "data" => [%{
+        "type" => "post",
+        "id" => "1",
+        "attributes" => %{
+          "title" => "Awesome title",
+          "body" => "Awesome Body"
+        }
+      },%{
         "type" => "user",
         "id" => "1",
         "attributes" => %{
@@ -82,13 +112,36 @@ defmodule Voorhees.Test.JSONApi do
 
     payload = %{
       "data" => [%{
-        "type" => "user",
+        "type" => "post",
         "id" => "1",
         "attributes" => %{
-          "email" => "test@example.com",
-          "name" => "Tester"
+          "title" => "Awesome title",
+          "body" => "Awesome Body"
         }
       },%{
+        "type" => "user",
+        "id" => "2",
+        "attributes" => %{
+          "email" => "test2@example.com",
+          "name" => "Tester"
+        }
+      }]
+    }
+
+    assert_raise ExUnit.AssertionError, "Expected schema did not contain type: user", fn ->
+      Voorhees.JSONApi.assert_schema payload, %{post: %{attributes: [:title, :body]}}
+    end
+
+    payload = %{
+      "data" => [%{
+        "type" => "post",
+        "id" => "1",
+        "attributes" => %{
+          "title" => "Awesome title",
+          "body" => "Awesome Body"
+        }
+      }],
+      "included" => [%{
         "type" => "user",
         "id" => "2",
         "attributes" => %{
@@ -140,9 +193,34 @@ defmodule Voorhees.Test.JSONApi do
         "id" => "1",
         "attributes" => %{
           "email" => "test@example.com",
+          "title" => "tester of tests",
           "name" => "Tester"
         }
       },%{
+        "type" => "user",
+        "id" => "2",
+        "attributes" => %{
+          "email" => "test2@example.com",
+          "name" => "Tester"
+        }
+      }]
+    }
+
+    assert_raise ExUnit.AssertionError, "Payload was missing attributes: title", fn ->
+      Voorhees.JSONApi.assert_schema payload, %{user: %{attributes: [:email, :name, :title]}}
+    end
+
+    payload = %{
+      "data" => [%{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "title" => "tester of tests",
+          "name" => "Tester"
+        }
+      }],
+      "included" => [%{
         "type" => "user",
         "id" => "2",
         "attributes" => %{
@@ -193,10 +271,30 @@ defmodule Voorhees.Test.JSONApi do
         "type" => "user",
         "id" => "1",
         "attributes" => %{
-          "email" => "test@example.com",
           "name" => "Tester"
         }
       },%{
+        "type" => "user",
+        "id" => "2",
+        "attributes" => %{
+          "email" => "test2@example.com"
+        }
+      }]
+    }
+
+    assert_raise ExUnit.AssertionError, "Payload contained additional attributes: name", fn ->
+      Voorhees.JSONApi.assert_schema payload, %{user: %{attributes: [:email]}}
+    end
+
+    payload = %{
+      "data" => [%{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test2@example.com",
+        }
+      }],
+      "included" => [%{
         "type" => "user",
         "id" => "2",
         "attributes" => %{
@@ -211,7 +309,7 @@ defmodule Voorhees.Test.JSONApi do
     end
   end
 
-  test "does not throw error when the data objects match" do
+  test "does not throw error when the payloads match" do
     payload = %{
       "data" => %{
         "type" => "user",

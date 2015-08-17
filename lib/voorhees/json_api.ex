@@ -5,6 +5,11 @@ defmodule Voorhees.JSONApi do
     list
     |> Enum.map(&(_assert_resource(&1, expected)))
 
+    if included = actual["included"] do
+      included
+      |> Enum.map(&(_assert_resource(&1, expected)))
+    end
+
     actual
   end
 
