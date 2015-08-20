@@ -356,6 +356,70 @@ defmodule Voorhees.Test.JSONApi do
     }
   end
 
+  test "does not throw errors when list's ordering differs with the `ignore_list_order` flag" do
+    payload = %{
+      "data" => [%{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      },%{
+        "type" => "user",
+        "id" => "2",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      }],
+      "included" => [%{
+        "type" => "member",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      },%{
+        "type" => "member",
+        "id" => "2",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      }]
+    }
+
+    Voorhees.JSONApi.assert_payload(payload, %{
+      data: [%{
+        id: "2",
+        type: "user",
+        attributes: %{
+          name: "Tester"
+        }
+      },%{
+        id: "1",
+        type: "user",
+        attributes: %{
+          name: "Tester"
+        }
+      }],
+      included: [%{
+        id: "2",
+        type: "member",
+        attributes: %{
+          name: "Tester"
+        }
+      },%{
+        id: "1",
+        type: "member",
+        attributes: %{
+          name: "Tester"
+        }
+      }]
+    }, ignore_list_order: true)
+  end
+
   test "throws an error when the actual payload is missing attributes" do
     payload = %{
       "data" => %{

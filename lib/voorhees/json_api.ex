@@ -45,8 +45,8 @@ defmodule Voorhees.JSONApi do
     assert [] == missing_attributes, "Payload was missing attributes: #{missing_attributes |> Enum.join(", ")}"
   end
 
-  def assert_payload(actual, expected) do
-    assert Voorhees.matches_payload?(actual, expected), "Payload did not match expected"
+  def assert_payload(actual, expected, options \\ []) do
+    assert Voorhees.matches_payload?(actual, expected, options), "Payload did not match expected"
 
     actual
   end

@@ -111,26 +111,38 @@ defmodule Voorhees do
   @spec matches_payload?(String.t, list | map) :: boolean
   def matches_payload?(payload, expected_payload) when is_binary(payload) do
     Poison.decode!(payload)
-    |> matches_payload?(expected_payload)
+    |> matches_payload?(expected_payload, [])
   end
 
   def matches_payload?(payload, expected_payload) do
+    matches_payload?(payload, expected_payload, [])
+  end
+
+  def matches_payload?(payload, expected_payload, options) do
     expected_payload = _normalize_map(expected_payload)
     parsed_payload = payload
-    |> _filter_out_extra_keys(expected_payload)
+    |> _filter_out_extra_keys(expected_payload, options)
 
     parsed_payload == expected_payload
   end
 
-  defp _filter_out_extra_keys(payload, expected_payload) when is_list(payload) do
-    payload
+  defp _filter_out_extra_keys(payload, expected_payload, options) when is_list(payload) do
+    filtered_payload = payload
     |> Enum.with_index
-    |> Enum.map(fn {value, index} -> _filter_out_extra_keys(value, Enum.at(expected_payload, index)) end)
+    |> Enum.map(fn {value, index} -> _filter_out_extra_keys(value, Enum.at(expected_payload, index), options) end)
+
+    if Dict.get(options, :ignore_list_order) do
+      if filtered_payload -- expected_payload == [] && expected_payload -- filtered_payload == [] do
+        filtered_payload = expected_payload
+      end
+    end
+
+    filtered_payload
   end
 
-  defp _filter_out_extra_keys(payload, nil) when is_map(payload), do: payload
+  defp _filter_out_extra_keys(payload, nil, _options) when is_map(payload), do: payload
 
-  defp _filter_out_extra_keys(payload, expected_payload) when is_map(payload) do
+  defp _filter_out_extra_keys(payload, expected_payload, options) when is_map(payload) do
     payload
     |> Enum.filter(fn
       {key, _value} ->
@@ -139,13 +151,13 @@ defmodule Voorhees do
         |> Enum.member?(key)
     end)
     |> Enum.map(fn
-      {key, value} when is_map(value) or is_list(value) -> {key, _filter_out_extra_keys(value, expected_payload[key])}
+      {key, value} when is_map(value) or is_list(value) -> {key, _filter_out_extra_keys(value, expected_payload[key], options)}
       entry -> entry
     end)
     |> Enum.into(%{})
   end
 
-  defp _filter_out_extra_keys(payload, _expected_payload), do: payload
+  defp _filter_out_extra_keys(payload, _expected_payload, _options), do: payload
 
   defp _normalize_map(map) when is_map(map) do
     map
