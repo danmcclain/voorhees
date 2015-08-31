@@ -444,4 +444,115 @@ defmodule Voorhees.Test.JSONApi do
       }
     end
   end
+
+  test "resulting payload types are all contained in the expected payload" do
+    expected = %{
+      user: %{
+        attributes: [:email, :name]
+      }
+    }
+
+    response = %{
+      "data" => %{
+        "id": "1",
+        "type": "user",
+        "attributes": %{
+          "email" => "test@example.com",
+          "name" => "Tester",
+          "is-admin" => false
+        }
+      },
+      "included" => [%{
+        "type" => "post",
+        "id" => "1",
+        "attributes" => %{"body" => "test"}
+      }]
+    }
+
+    Voorhees.JSONApi.assert_schema_contains(response, expected)
+  end
+
+  test "resulting payload types not contained in the expected payload" do
+    expected = %{
+      "other-user": %{
+        attributes: [:email, :name]
+      }
+    }
+
+    response = %{
+      "data" => %{
+        "id": "1",
+        "type": "user",
+        "attributes": %{
+          "email" => "test@example.com",
+          "name" => "Tester",
+          "is-admin" => false
+        }
+      },
+      "included" => [%{
+        "type" => "post",
+        "id" => "1",
+        "attributes" => %{"body" => "test"}
+      }]
+    }
+
+    assert_raise ExUnit.AssertionError, "Expected types: other-user\nGot: user, post", fn ->
+      Voorhees.JSONApi.assert_schema_contains response, expected
+    end
+  end
+
+  test "resulting payload attributes contained in the expected payload" do
+    expected = %{
+      "user": %{
+        attributes: [:email, :name]
+      }
+    }
+
+    response = %{
+      "data" => %{
+        "id": "1",
+        "type": "user",
+        "attributes": %{
+          "email" => "test@example.com",
+          "name" => "Tester",
+          "is-admin" => false
+        }
+      },
+      "included" => [%{
+        "type" => "post",
+        "id" => "1",
+        "attributes" => %{"body" => "test"}
+      }]
+    }
+
+    Voorhees.JSONApi.assert_schema_contains(response, expected)
+  end
+
+  test "resulting payload attributes not contained in the expected payload" do
+    expected = %{
+      "user": %{
+        attributes: [:email, :name]
+      }
+    }
+
+    response = %{
+      "data" => %{
+        "id": "1",
+        "type": "user",
+        "attributes": %{
+          "email" => "test@example.com",
+          "is-admin" => false
+        }
+      },
+      "included" => [%{
+        "type" => "post",
+        "id" => "1",
+        "attributes" => %{"body" => "test"}
+      }]
+    }
+
+    assert_raise ExUnit.AssertionError, "Expected type: user to contain: email, name\nGot: email, is-admin", fn ->
+      Voorhees.JSONApi.assert_schema_contains response, expected
+    end
+  end
 end
