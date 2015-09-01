@@ -445,7 +445,7 @@ defmodule Voorhees.Test.JSONApi do
     end
   end
 
-  test "resulting payload types are all contained in the expected payload" do
+  test "resulting payload types are all contained in the expected payload and returns response" do
     expected = %{
       user: %{
         attributes: [:email, :name]
@@ -469,7 +469,7 @@ defmodule Voorhees.Test.JSONApi do
       }]
     }
 
-    Voorhees.JSONApi.assert_schema_contains(response, expected)
+    assert response == Voorhees.JSONApi.assert_schema_contains(response, expected)
   end
 
   test "resulting payload types not contained in the expected payload" do
@@ -556,7 +556,7 @@ defmodule Voorhees.Test.JSONApi do
     end
   end
 
-  test "resulting payload data are all contained in the expected payload data" do
+  test "resulting payload data are all contained in the expected payload data and returns response" do
     expected = %{
       user: %{
         attributes: %{
@@ -582,10 +582,9 @@ defmodule Voorhees.Test.JSONApi do
       }]
     }
 
-    Voorhees.JSONApi.assert_payload_contains(response, expected)
+    assert response == Voorhees.JSONApi.assert_payload_contains(response, expected)
   end
 
-  @tag timeout: 3_000_000
   test "resulting payload data are not all contained in the expected payload" do
     expected = %{
       user: %{
