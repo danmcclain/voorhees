@@ -555,4 +555,66 @@ defmodule Voorhees.Test.JSONApi do
       Voorhees.JSONApi.assert_schema_contains response, expected
     end
   end
+
+  test "resulting payload data are all contained in the expected payload data" do
+    expected = %{
+      user: %{
+        attributes: %{
+          email: "test@example.com"
+        }
+      }
+    }
+
+    response = %{
+      "data" => %{
+        "id": "1",
+        "type": "user",
+        "attributes": %{
+          "email" => "test@example.com",
+          "name" => "Tester",
+          "is-admin" => false
+        }
+      },
+      "included" => [%{
+        "type" => "post",
+        "id" => "1",
+        "attributes" => %{"body" => "test"}
+      }]
+    }
+
+    Voorhees.JSONApi.assert_payload_contains(response, expected)
+  end
+
+  @tag timeout: 3_000_000
+  test "resulting payload data are not all contained in the expected payload" do
+    expected = %{
+      user: %{
+        attributes: %{
+          email: "test@example.com",
+          name: "Other"
+        }
+      }
+    }
+
+    response = %{
+      "data" => %{
+        "id": "1",
+        "type": "user",
+        "attributes": %{
+          "email" => "test@example.com",
+          "name" => "Tester",
+          "is-admin" => false
+        }
+      },
+      "included" => [%{
+        "type" => "post",
+        "id" => "1",
+        "attributes" => %{"body" => "test"}
+      }]
+    }
+
+    assert_raise ExUnit.AssertionError, "Expected type: user to contain record with values: email: test@example.com, name: Other", fn ->
+      Voorhees.JSONApi.assert_payload_contains response, expected
+    end
+  end
 end
