@@ -46,6 +46,30 @@ defmodule Voorhees.JSONApi do
     end
   end
 
+  def assert_payload_contains(%{"data" => resource} = actual, expected) when is_map(resource) do
+    assert_payload_contains(put_in(actual["data"], [resource]), expected)
+  end
+  def assert_payload_contains(%{"data" => resources} = actual, expected) when is_list(resources) do
+    actual = Enum.map(resources ++ (actual["included"] || []), fn(resource) -> _stringify_keys(resource) end)
+    _assert_payload_contains(actual, _stringify_keys(expected))
+  end
+  defp _assert_payload_contains(actual, expected) do
+    Map.keys(expected)
+    |> Enum.each fn(expected_type) ->
+      expected[expected_type]
+      |> List.wrap
+      |> Enum.each fn(%{"attributes" => expected_attributes}) ->
+        assert Enum.reduce(actual, false, fn(%{"attributes" => actual_attributes, "type" => actual_type}, result) ->
+          if !result && actual_type == expected_type do
+            length(Map.to_list(expected_attributes) -- Map.to_list(actual_attributes)) == 0
+          else
+            result
+          end
+        end), "Expected type: #{expected_type} to contain record with values: #{Enum.map_join(expected_attributes, ", ", fn({k, v}) -> "#{k}: #{v}" end)}"
+      end
+    end
+  end
+
   defp _assert_resource(resource, expected) do
     %{"type" => type, "attributes" => attributes} = resource
 
