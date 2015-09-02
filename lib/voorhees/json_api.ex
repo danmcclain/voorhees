@@ -21,10 +21,14 @@ defmodule Voorhees.JSONApi do
 
   def assert_schema_contains(%{"data" => resource} = actual, expected) when is_map(resource) do
     assert_schema_contains(put_in(actual["data"], [resource]), expected)
+
+    actual
   end
   def assert_schema_contains(%{"data" => resources} = actual, expected) when is_list(resources) do
-    actual = Enum.map(resources ++ (actual["included"] || []), fn(resource) -> _stringify_keys(resource) end)
-    _assert_schema_contains(actual, _stringify_keys(expected))
+    Enum.map(resources ++ List.wrap(actual["included"]), fn(resource) -> _stringify_keys(resource) end)
+    |> _assert_schema_contains(_stringify_keys(expected))
+
+    actual
   end
 
   defp _assert_schema_contains(actual, expected) do
@@ -48,10 +52,14 @@ defmodule Voorhees.JSONApi do
 
   def assert_payload_contains(%{"data" => resource} = actual, expected) when is_map(resource) do
     assert_payload_contains(put_in(actual["data"], [resource]), expected)
+
+    actual
   end
   def assert_payload_contains(%{"data" => resources} = actual, expected) when is_list(resources) do
-    actual = Enum.map(resources ++ (actual["included"] || []), fn(resource) -> _stringify_keys(resource) end)
-    _assert_payload_contains(actual, _stringify_keys(expected))
+    Enum.map(resources ++ List.wrap(actual["included"]), fn(resource) -> _stringify_keys(resource) end)
+    |> _assert_payload_contains(_stringify_keys(expected))
+
+    actual
   end
   defp _assert_payload_contains(actual, expected) do
     Map.keys(expected)
@@ -110,6 +118,10 @@ defmodule Voorhees.JSONApi do
     [head|_stringify_items(tail)]
   end
 
+  defp _stringify_keys([]), do: []
+  defp _stringify_keys([head|tail]) do
+    [_stringify_keys(head)|_stringify_keys(tail)]
+  end
   defp _stringify_keys(object) when is_map(object) do
     Enum.into(object, %{}, &_stringify_key(&1))
   end
