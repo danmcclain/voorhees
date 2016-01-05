@@ -420,7 +420,7 @@ defmodule Voorhees.Test.JSONApi do
     }, ignore_list_order: true)
   end
 
-  test "throws an error when the actual payload is missing attributes" do
+  test "throws an error when the actual payload is missing attributes in data as a map" do
     payload = %{
       "data" => %{
         "type" => "user",
@@ -431,7 +431,17 @@ defmodule Voorhees.Test.JSONApi do
       }
     }
 
-    assert_raise ExUnit.AssertionError, "Payload did not match expected", fn ->
+    assert_raise ExUnit.AssertionError, """
+    Payload did not match expected
+
+    "data" did not match expected
+    Expected:
+      %{"attributes" => %{email: "test@example.com", name: "Tester"}, "id" => "1", "type" => "user"}
+    Actual (filtered):
+      %{"attributes" => %{"name" => "Tester"}, "id" => "1", "type" => "user"}
+    Actual (untouched):
+      %{"attributes" => %{"name" => "Tester"}, "id" => "1", "type" => "user"}
+    """, fn ->
       Voorhees.JSONApi.assert_payload payload, %{
         data: %{
           id: "1",
@@ -614,6 +624,43 @@ defmodule Voorhees.Test.JSONApi do
 
     assert_raise ExUnit.AssertionError, "Expected type: user to contain record with values: email: test@example.com, name: Other", fn ->
       Voorhees.JSONApi.assert_payload_contains response, expected
+    end
+  end
+
+  test "throws an error when the actual payload is missing attributes in data as a list" do
+    payload = %{
+      "data" => [%{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "name" => "Tester"
+        }
+      }]
+    }
+
+    assert_raise ExUnit.AssertionError, """
+    Payload did not match expected
+
+    "data" did not match expected
+
+    Resource at index 0 did not match
+    Expected:
+      %{"attributes" => %{email: "test@example.com", name: "Tester"}, "id" => "1", "type" => "user"}
+    Actual (filtered):
+      %{"attributes" => %{"name" => "Tester"}, "id" => "1", "type" => "user"}
+    Actual (untouched):
+      %{"attributes" => %{"name" => "Tester"}, "id" => "1", "type" => "user"}
+    """, fn ->
+      Voorhees.JSONApi.assert_payload payload, %{
+        data: [%{
+          id: "1",
+          type: "user",
+          attributes: %{
+            email: "test@example.com",
+            name: "Tester"
+          }
+        }]
+      }
     end
   end
 end
