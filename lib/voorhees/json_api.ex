@@ -149,6 +149,10 @@ defmodule Voorhees.JSONApi do
     expected = normalize_map_keys(expected)
     filtered_actual = remove_extra_info(actual, expected)
 
+    # These two values are always different, even if payload matches. (need to normalize inner map)
+    # The following fails:
+    # expected: %{"attributes" => %{name: "Tester"}, "id" => "1", "type" => "user"}
+    # filtered_actual: %{"attributes" => %{"name" => "Tester"}, "id" => "1", "type" => "user"}
     if (filtered_actual == expected) do
       :ok
     else
@@ -214,7 +218,7 @@ defmodule Voorhees.JSONApi do
     |> Enum.with_index
     |> Enum.map(fn
       {value, index} ->
-        clean_value(value, Enun.at(expected_value, index))
+        clean_value(value, Enum.at(expected_value, index))
     end)
   end
 
@@ -226,6 +230,13 @@ defmodule Voorhees.JSONApi do
     |> Enum.into(%{})
   end
 
-  defp normalize_key({key, value}) when is_atom(key), do: {Atom.to_string(key), value}
+  # defp normalize_map_keys(value), do: value
+
+  defp normalize_key({key, value}) when is_atom(key) do
+    # call `normalize_map_keys` on value?
+    # {Atom.to_string(key), normalize_map_keys(value)}
+    {Atom.to_string(key), value}
+  end
+
   defp normalize_key(tuple), do: tuple
 end

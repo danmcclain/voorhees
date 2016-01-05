@@ -663,4 +663,122 @@ defmodule Voorhees.Test.JSONApi do
       }
     end
   end
+
+  test "throws an error when the actual payload has a different value for attributes in data as a map" do
+    payload = %{
+      "data" => %{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "name" => "Tester1"
+        }
+      }
+    }
+
+    assert_raise ExUnit.AssertionError, """
+    Payload did not match expected
+
+    "data" did not match expected
+    Expected:
+      %{"attributes" => %{name: "Tester"}, "id" => "1", "type" => "user"}
+    Actual (filtered):
+      %{"attributes" => %{"name" => "Tester1"}, "id" => "1", "type" => "user"}
+    Actual (untouched):
+      %{"attributes" => %{"name" => "Tester1"}, "id" => "1", "type" => "user"}
+    """, fn ->
+      Voorhees.JSONApi.assert_payload payload, %{
+        data: %{
+          id: "1",
+          type: "user",
+          attributes: %{
+            name: "Tester"
+          }
+        }
+      }
+    end
+  end
+
+  test "throws an error when the actual payload has a different value for attributes as a list" do
+    payload = %{
+      "data" => [%{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "name" => "Tester1"
+        }
+      }]
+    }
+
+    assert_raise ExUnit.AssertionError, """
+    Payload did not match expected
+
+    "data" did not match expected
+
+    Resource at index 0 did not match
+    Expected:
+      %{"attributes" => %{name: "Tester"}, "id" => "1", "type" => "user"}
+    Actual (filtered):
+      %{"attributes" => %{"name" => "Tester1"}, "id" => "1", "type" => "user"}
+    Actual (untouched):
+      %{"attributes" => %{"name" => "Tester1"}, "id" => "1", "type" => "user"}
+    """, fn ->
+      Voorhees.JSONApi.assert_payload payload, %{
+        data: [%{
+          id: "1",
+          type: "user",
+          attributes: %{
+            name: "Tester"
+          }
+        }]
+      }
+    end
+  end
+
+  test "throws an error when the actual payload has a differing list item as a list" do
+    payload = %{
+      "data" => [%{
+        "id" => "1",
+        "type" => "user",
+        "attributes" => %{
+          "name" => "Tester"
+        }
+        }, %{
+        "type" => "user",
+        "id" => "2",
+        "attributes" => %{
+          "name" => "Tester2"
+        }
+      }]
+    }
+
+    assert_raise ExUnit.AssertionError, """
+    Payload did not match expected
+
+    "data" did not match expected
+
+    Resource at index 1 did not match
+    Expected:
+      %{"attributes" => %{name: "Tester3"}, "id" => "2", "type" => "user"}
+    Actual (filtered):
+      %{"attributes" => %{"name" => "Tester2"}, "id" => "2", "type" => "user"}
+    Actual (untouched):
+      %{"attributes" => %{"name" => "Tester2"}, "id" => "2", "type" => "user"}
+    """, fn ->
+      Voorhees.JSONApi.assert_payload payload, %{
+        data: [%{
+          id: "1",
+          type: "user",
+          attributes: %{
+            name: "Tester"
+          }
+          }, %{
+          id: "2",
+          type: "user",
+          attributes: %{
+            name: "Tester3"
+          }
+        }]
+      }
+    end
+  end
 end
