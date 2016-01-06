@@ -909,4 +909,152 @@ defmodule Voorhees.Test.JSONApi.AssertPayloadTest do
       })
     end
   end
+
+  test "should pass with equal payloads containing both data and included" do
+    payload = %{
+      "data" => %{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      },
+      "included" => [%{
+        "id" => "1",
+        "type" => "user",
+        "attributes" => %{
+          "name" => "Tester1"
+        }
+      }]
+    }
+
+    Voorhees.JSONApi.assert_payload payload, %{
+      "data" => %{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      },
+      "included" => [%{
+        id: "1",
+        type: "user",
+        attributes: %{
+          name: "Tester1"
+        }
+      }]
+    }
+  end
+
+  test "throw an error when payload does not contain data or included, but is expected" do
+    payload = %{}
+
+    assert_raise ExUnit.AssertionError, """
+    Payload did not match expected
+
+    "data" was expected, but was not present
+
+    "included" was expected, but was not present
+    """, fn ->
+      Voorhees.JSONApi.assert_payload(payload, %{
+      "data" => %{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      },
+      "included" => [%{
+          id: "1",
+          type: "user",
+          attributes: %{
+            name: "Tester1"
+          }
+        }]
+      })
+    end
+  end
+
+  test "doesn't throw an error when payload contains data or included, but is not expected" do
+    payload = %{
+      "data" => %{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "name" => "Tester"
+        }
+      },
+      "included" => [%{
+        "id" => "1",
+        "type" => "user",
+        "attributes" => %{
+          "name" => "Tester"
+        }
+      }]
+    }
+
+    Voorhees.JSONApi.assert_payload(payload, %{})
+  end
+
+  test "throw an error when payloads containing both data and included have incorrect resources" do
+    payload = %{
+      "data" => %{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "name" => "Tester"
+        }
+      },
+      "included" => [%{
+        "id" => "1",
+        "type" => "user",
+        "attributes" => %{
+          "name" => "Tester"
+        }
+      }]
+    }
+
+    assert_raise ExUnit.AssertionError, """
+    Payload did not match expected
+
+    "data" did not match expected
+    Expected:
+      %{"attributes" => %{"email" => "test@example.com", "name" => "Tester"}, "id" => "1", "type" => "user"}
+    Actual (filtered):
+      %{"attributes" => %{"name" => "Tester"}, "id" => "1", "type" => "user"}
+    Actual (untouched):
+      %{"attributes" => %{"name" => "Tester"}, "id" => "1", "type" => "user"}
+
+    "included" did not match expected
+
+    Resource at index 0 did not match
+    Expected:
+      %{"attributes" => %{"name" => "Tester1"}, "id" => "1", "type" => "user"}
+    Actual (filtered):
+      %{"attributes" => %{"name" => "Tester"}, "id" => "1", "type" => "user"}
+    Actual (untouched):
+      %{"attributes" => %{"name" => "Tester"}, "id" => "1", "type" => "user"}
+    """, fn ->
+      Voorhees.JSONApi.assert_payload(payload, %{
+      "data" => %{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      },
+      "included" => [%{
+          id: "1",
+          type: "user",
+          attributes: %{
+            name: "Tester1"
+          }
+        }]
+      })
+    end
+  end
 end

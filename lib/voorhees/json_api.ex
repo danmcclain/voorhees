@@ -140,17 +140,43 @@ defmodule Voorhees.JSONApi do
     expected = normalize_map_keys(expected)
   end
 
+  defp compare_property(actual, expected, property_name, options) do
+    actual_value = Map.fetch(actual, property_name)
+    expected_value =  Map.fetch(expected, property_name)
+
+    case {Map.fetch(actual, property_name), Map.fetch(expected, property_name)} do
+      {:error, :error} -> :ok
+      {:error, {:ok, expected_value}} -> format_missing_actual_error(actual_value, expected_value, property_name)
+      {_, :error} -> :ok
+      {{:ok, actual_value}, {:ok, expected_value}} ->
+         compare_resources(actual_value, expected_value, options)
+         |> case do
+           {:error, message} ->
+             {:error, "\"#{property_name}\" did not match expected\n" <> message}
+           :ok -> :ok
+           {:ok, _} -> :ok # compare_resources_list returns this tuple due to reduce function
+         end
+    end
+  end
+
+  defp merge_results(existing, new) do
+    case {existing, new} do
+      {:ok, state} -> state
+      {state, :ok} -> state
+      {{:error, existing_message}, {:error, new_message}} ->
+        {:error, existing_message <> "\n" <> new_message}
+    end
+  end
+
   defp compare_payloads(actual, expected, options) do
     expected = normalize_map(expected)
 
-    with {:ok, actual_data} <- Map.fetch(actual, "data"),
-         {:ok, expected_data} <- Map.fetch(expected, "data") do
-           compare_resources(actual_data, expected_data, options)
-           |> case do
-             {:error, message} -> {:error, "\"data\" did not match expected\n" <> message}
-             :ok -> :ok
-           end
-         end
+    result = compare_property(actual, expected, "data", options)
+    merge_results(result, compare_property(actual, expected, "included", options))
+  end
+
+  defp format_missing_actual_error(:error, expected, property_name) do
+    {:error, "\"#{property_name}\" was expected, but was not present\n"}
   end
 
   defp compare_resources(actual, expected, options) when is_map(actual) do
