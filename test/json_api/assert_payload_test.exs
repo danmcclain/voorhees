@@ -59,7 +59,7 @@ defmodule Voorhees.Test.JSONApi.AssertPayloadTest do
         "attributes" => %{
           "email" => "test@example.com",
           "name" => "Tester"
-        }
+        },
       }
     }
 
@@ -154,7 +154,7 @@ defmodule Voorhees.Test.JSONApi.AssertPayloadTest do
 
     "data" did not match expected
     Expected:
-      %{"attributes" => %{"email" => "test@example.com", "name" => "Tester"}, "id" => "1", "type" => "user"}
+      %{"attributes" => %{"email" => "test@example.com", "name" => "Tester"}, "id" => "1", "relationships" => %{"thing" => %{"data" => %{"id" => "1", "type" => "thing"}}}, "type" => "user"}
     Actual (filtered):
       %{"attributes" => %{"name" => "Tester"}, "id" => "1", "type" => "user"}
     Actual (untouched):
@@ -167,6 +167,9 @@ defmodule Voorhees.Test.JSONApi.AssertPayloadTest do
           attributes: %{
             email: "test@example.com",
             name: "Tester"
+          },
+          relationships: %{
+            thing: %{data: %{id: "1", type: "thing"}}
           }
         }
       }
