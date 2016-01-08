@@ -10,6 +10,19 @@ defmodule Voorhees.Test.JSONApi.AssertPayloadTest do
           "email" => "test@example.com",
           "name" => "Tester"
         }
+      },
+      "included" => [%{
+        "type" => "post",
+        "id" => "1",
+        "attributes" => %{
+          "content" => "test content"
+        }
+      }],
+      "meta" => %{
+        "test" => "value"
+      },
+      "links" => %{
+        "self" => "http://example.com/payload"
       }
     }
 
@@ -21,6 +34,19 @@ defmodule Voorhees.Test.JSONApi.AssertPayloadTest do
           email: "test@example.com",
           name: "Tester"
         }
+      },
+      included: [%{
+        id: "1",
+        type: "post",
+        attributes: %{
+          content: "test content"
+        }
+      }],
+      meta: %{
+        test: "value"
+      },
+      links: %{
+        self: "http://example.com/payload"
       }
     }
   end
@@ -999,7 +1025,7 @@ defmodule Voorhees.Test.JSONApi.AssertPayloadTest do
     Voorhees.JSONApi.assert_payload(payload, %{})
   end
 
-  test "throw an error when payloads containing both data and included have incorrect resources" do
+  test "throws the right error message when all parts of the payload are incorrect" do
     payload = %{
       "data" => %{
         "type" => "user",
@@ -1014,7 +1040,13 @@ defmodule Voorhees.Test.JSONApi.AssertPayloadTest do
         "attributes" => %{
           "name" => "Tester"
         }
-      }]
+      }],
+      "meta" => %{
+        "test" => "value"
+      },
+      "links" => %{
+        "self" => "http://example.com/payload"
+      }
     }
 
     assert_raise ExUnit.AssertionError, """
@@ -1037,23 +1069,45 @@ defmodule Voorhees.Test.JSONApi.AssertPayloadTest do
       %{"attributes" => %{"name" => "Tester"}, "id" => "1", "type" => "user"}
     Actual (untouched):
       %{"attributes" => %{"name" => "Tester"}, "id" => "1", "type" => "user"}
+
+    "meta" did not match expected
+    Expected:
+      %{"other" => "value"}
+    Actual (filtered):
+      %{}
+    Actual (untouched):
+      %{"test" => "value"}
+
+    "links" did not match expected
+    Expected:
+      %{"self" => "http://google.com"}
+    Actual (filtered):
+      %{"self" => "http://example.com/payload"}
+    Actual (untouched):
+      %{"self" => "http://example.com/payload"}
     """, fn ->
       Voorhees.JSONApi.assert_payload(payload, %{
-      "data" => %{
-        "type" => "user",
-        "id" => "1",
-        "attributes" => %{
-          "email" => "test@example.com",
-          "name" => "Tester"
-        }
-      },
-      "included" => [%{
-          id: "1",
-          type: "user",
-          attributes: %{
-            name: "Tester1"
+        "data" => %{
+          "type" => "user",
+          "id" => "1",
+          "attributes" => %{
+            "email" => "test@example.com",
+            "name" => "Tester"
           }
-        }]
+        },
+        "included" => [%{
+            id: "1",
+            type: "user",
+            attributes: %{
+              name: "Tester1"
+            }
+        }],
+        meta: %{
+          other: "value"
+        },
+        links: %{
+          self: "http://google.com"
+        }
       })
     end
   end

@@ -171,8 +171,10 @@ defmodule Voorhees.JSONApi do
   defp compare_payloads(actual, expected, options) do
     expected = normalize_map(expected)
 
-    result = compare_property(actual, expected, "data", options)
-    merge_results(result, compare_property(actual, expected, "included", options))
+    compare_property(actual, expected, "data", options)
+    |> merge_results(compare_property(actual, expected, "included", options))
+    |> merge_results(compare_property(actual, expected, "meta", options))
+    |> merge_results(compare_property(actual, expected, "links", options))
   end
 
   defp format_missing_actual_error(:error, expected, property_name) do
