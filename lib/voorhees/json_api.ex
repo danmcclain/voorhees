@@ -25,8 +25,8 @@ defmodule Voorhees.JSONApi do
     actual
   end
   def assert_schema_contains(%{"data" => resources} = actual, expected) when is_list(resources) do
-    Enum.map(resources ++ List.wrap(actual["included"]), fn(resource) -> _stringify_keys(resource) end)
-    |> _assert_schema_contains(_stringify_keys(expected))
+    Enum.map(resources ++ List.wrap(actual["included"]), fn(resource) -> normalize_map(resource) end)
+    |> _assert_schema_contains(normalize_map(expected))
 
     actual
   end
@@ -56,8 +56,8 @@ defmodule Voorhees.JSONApi do
     actual
   end
   def assert_payload_contains(%{"data" => resources} = actual, expected) when is_list(resources) do
-    Enum.map(resources ++ List.wrap(actual["included"]), fn(resource) -> _stringify_keys(resource) end)
-    |> _assert_payload_contains(_stringify_keys(expected))
+    Enum.map(resources ++ List.wrap(actual["included"]), fn(resource) -> normalize_map(resource) end)
+    |> _assert_payload_contains(normalize_map(expected))
 
     actual
   end
@@ -118,20 +118,6 @@ defmodule Voorhees.JSONApi do
   defp _stringify_items([head|tail]) when is_binary(head) do
     [head|_stringify_items(tail)]
   end
-
-  defp _stringify_keys([]), do: []
-  defp _stringify_keys([head|tail]) do
-    [_stringify_keys(head)|_stringify_keys(tail)]
-  end
-  defp _stringify_keys(object) when is_map(object) do
-    Enum.into(object, %{}, &_stringify_key(&1))
-  end
-  defp _stringify_keys(object), do: object
-  defp _stringify_key({key, value}) when is_binary(key),
-    do: {key, _stringify_keys(value)}
-  defp _stringify_key({key, value}) when is_atom(key),
-    do: {Atom.to_string(key), _stringify_keys(value)}
-
 
   defp error_message(:ok), do: ""
   defp error_message({:error, message}), do: "Payload did not match expected\n\n" <> message
