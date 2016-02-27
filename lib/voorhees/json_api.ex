@@ -63,10 +63,10 @@ defmodule Voorhees.JSONApi do
   end
   defp _assert_payload_contains(actual, expected) do
     Map.keys(expected)
-    |> Enum.each fn(expected_type) ->
+    |> Enum.each(fn(expected_type) ->
       expected[expected_type]
-      |> List.wrap
-      |> Enum.each fn(%{"attributes" => expected_attributes}) ->
+      |> List.wrap()
+      |> Enum.each(fn(%{"attributes" => expected_attributes}) ->
         assert Enum.reduce(actual, false, fn(%{"attributes" => actual_attributes, "type" => actual_type}, result) ->
           if !result && actual_type == expected_type do
             length(Map.to_list(expected_attributes) -- Map.to_list(actual_attributes)) == 0
@@ -74,8 +74,8 @@ defmodule Voorhees.JSONApi do
             result
           end
         end), "Expected type: #{expected_type} to contain record with values: #{Enum.map_join(expected_attributes, ", ", fn({k, v}) -> "#{k}: #{v}" end)}"
-      end
-    end
+      end)
+    end)
   end
 
   defp _assert_resource(resource, expected) do
@@ -138,7 +138,6 @@ defmodule Voorhees.JSONApi do
 
   defp compare_property(actual, expected, property_name, options) do
     actual_value = Map.fetch(actual, property_name)
-    expected_value =  Map.fetch(expected, property_name)
 
     case {Map.fetch(actual, property_name), Map.fetch(expected, property_name)} do
       {:error, :error} -> :ok
@@ -173,7 +172,7 @@ defmodule Voorhees.JSONApi do
     |> merge_results(compare_property(actual, expected, "links", options))
   end
 
-  defp format_missing_actual_error(:error, expected, property_name) do
+  defp format_missing_actual_error(:error, _expected, property_name) do
     {:error, "\"#{property_name}\" was expected, but was not present\n"}
   end
 
@@ -231,15 +230,15 @@ defmodule Voorhees.JSONApi do
   end
 
   defp compare_resources_list(actual, expected, options) when is_list(actual) do
-    message = actual
+    actual
     |> Enum.zip(expected)
     |> Enum.map(fn
       {actual_resource, expected_resource} ->
         compare_resources(actual_resource, expected_resource, options)
     end)
-    |> Enum.with_index
+    |> Enum.with_index()
     |> Enum.reduce({:ok, ""}, fn
-      {{:error, message}, index}, {_state, acc_message} = acc ->
+      {{:error, message}, index}, {_state, acc_message} ->
         {:error, acc_message <> "\nResource at index #{index} did not match\n" <> message}
       _, acc -> acc
     end)
