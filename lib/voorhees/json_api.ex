@@ -135,10 +135,6 @@ defmodule Voorhees.JSONApi do
 
   defp error_message(:ok), do: ""
   defp error_message({:error, message}), do: "Payload did not match expected\n\n" <> message
-  defp error_message(actual, expected) do
-    full_message = "Payload did not match expected\n\n"
-    expected = normalize_map_keys(expected)
-  end
 
   defp compare_property(actual, expected, property_name, options) do
     actual_value = Map.fetch(actual, property_name)

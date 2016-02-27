@@ -574,7 +574,7 @@ defmodule Voorhees.Test.JSONApi.AssertPayloadTest do
     end
   end
 
-  test "throws an error when the actual payload is missing attributes in data as a list" do
+  test "throws an error when the actual payload is missing attributes in included as a list" do
     payload = %{
       "included" => [%{
         "type" => "user",
