@@ -162,7 +162,7 @@ defmodule Voorhees.JSONApi do
     {:error, "\"#{property_name}\" was expected, but was not present\n"}
   end
 
-  defp compare_resources(actual, expected, options) when is_map(actual) do
+  defp compare_resources(actual, expected, options) when is_map(actual) or is_map(expected) do
     filtered_actual = filter_out_extra_keys(actual, expected, options)
 
     if (filtered_actual == expected) do
@@ -217,7 +217,7 @@ defmodule Voorhees.JSONApi do
 
   defp compare_resources_list(actual, expected, options) when is_list(actual) do
     actual
-    |> Enum.zip(expected)
+    |> padded_zip(expected)
     |> Enum.map(fn
       {actual_resource, expected_resource} ->
         compare_resources(actual_resource, expected_resource, options)
@@ -230,10 +230,20 @@ defmodule Voorhees.JSONApi do
     end)
   end
 
+  defp padded_zip([head1|rest1], [head2|rest2]) do
+    [{head1,head2}|padded_zip(rest1, rest2)]
+  end
+  defp padded_zip([head1|rest1],[]) do
+    [{head1,nil}|padded_zip(rest1, [])]
+  end
+  defp padded_zip([],[head2|rest2]) do
+    [{nil,head2}|padded_zip([], rest2)]
+  end
+  defp padded_zip([],[]), do: []
+
   defp normalize_map(map) when is_map(map) do
     map
-    |> Enum.map(&normalize_map_entry/1)
-    |> Enum.into(%{})
+    |> Enum.into(%{}, &normalize_map_entry/1)
   end
 
   defp normalize_map(list) when is_list(list), do: Enum.map(list, &normalize_map/1)
