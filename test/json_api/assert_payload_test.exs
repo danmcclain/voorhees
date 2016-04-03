@@ -647,6 +647,91 @@ defmodule Voorhees.Test.JSONApi.AssertPayloadTest do
     end
   end
 
+  test "throw an error when the `ignore_list_order` flag is not set, but is missing a resource in included" do
+    payload = %{
+      "included" => [%{
+        "type" => "user",
+        "id" => "1",
+        "attributes" => %{
+          "email" => "test@example.com",
+          "name" => "Tester"
+        }
+      }]
+    }
+
+    assert_raise ExUnit.AssertionError, """
+    Payload did not match expected
+
+    "included" did not match expected
+
+    Resource at index 1 did not match
+    Expected:
+      %{"attributes" => %{"name" => "Tester"}, "id" => "2", "type" => "user"}
+    Actual (filtered):
+      nil
+    Actual (untouched):
+      nil
+    """, fn ->
+      Voorhees.JSONApi.assert_payload(payload, %{
+        included: [%{
+          id: "1",
+          type: "user",
+          attributes: %{
+            name: "Tester"
+          }
+        },%{
+          id: "2",
+          type: "user",
+          attributes: %{
+            name: "Tester"
+          }
+        }]
+      })
+    end
+
+    payload = %{
+      "included" => []
+    }
+
+    assert_raise ExUnit.AssertionError, """
+    Payload did not match expected
+
+    "included" did not match expected
+
+    Resource at index 0 did not match
+    Expected:
+      %{"attributes" => %{"name" => "Tester"}, "id" => "2", "type" => "user"}
+    Actual (filtered):
+      nil
+    Actual (untouched):
+      nil
+
+    Resource at index 1 did not match
+    Expected:
+      %{"attributes" => %{"name" => "Tester"}, "id" => "1", "type" => "user"}
+    Actual (filtered):
+      nil
+    Actual (untouched):
+      nil
+    """, fn ->
+      Voorhees.JSONApi.assert_payload(payload, %{
+        included: [%{
+          id: "2",
+          type: "user",
+          attributes: %{
+            name: "Tester"
+          }
+        },%{
+          id: "1",
+          type: "user",
+          attributes: %{
+            name: "Tester"
+          }
+        }]
+      })
+    end
+  end
+
   test "throws an error when the included payload has a resource that does not match the expected" do
     payload = %{
       "included" => [%{
